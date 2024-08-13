@@ -397,8 +397,8 @@ def _prepare_for_llama_export(modelname: str, args) -> LLMEdgeManager:
             # to get free perf gain.
             transforms.append(replace_sdpa_with_simple_sdpa)
             transforms.append(replace_causal_mask)
-    return (
-        _load_llama_model(
+
+    llm_edge_manager = (_load_llama_model(
             modelname=modelname,
             checkpoint=checkpoint_path,
             checkpoint_dir=checkpoint_dir,
@@ -413,8 +413,13 @@ def _prepare_for_llama_export(modelname: str, args) -> LLMEdgeManager:
         )
         .set_output_dir(output_dir_path)
         .to_dtype(dtype_override)
-        .source_transform(transforms)
-    )
+        .source_transform(transforms))
+
+    inputs = llm_edge_manager.example_inputs
+
+    output = llm_edge_manager.model.forward(*inputs)
+
+    return llm_edge_manager
 
 
 def get_quantizer_and_quant_params(args):

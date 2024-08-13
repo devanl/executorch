@@ -526,5 +526,6 @@ class Transformer(nn.Module):
 
         h = self.norm(h)
 
+        h = h[:, -1, :]
         logits = self.output(h)
         return logits
